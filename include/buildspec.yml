@@ -1,0 +1,14 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      php: 8.1
+  build:
+    commands:
+      - php -r "copy('https://getcomposer.org/installer','composer-setup.php');"
+      - php composer-setup.php --install-dir=.
+      - php composer.phar install --no-dev --prefer-dist
+artifacts:
+  files:
+    - '**/*'
+  base-directory: '.'
