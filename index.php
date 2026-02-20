@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors',1);
+ini_set('display_startup_errors',1);
+error_reporting(E_ALL);
+<?php
 // --- PHP LOGIN LOGIC ---
 // This block should be at the very top of the file, before any HTML.
 
