@@ -12,3 +12,10 @@ if ($mysqli->connect_error) {
     exit("Database connection failed");
 }
 $mysqli->set_charset("utf8mb4");
+
+$conn=mysqli_connect("library-db.cfik8aewcbl1.ap-south-1.rds.amazonaws.com","admin","Admin098","library");
+
+if(!$conn){
+    die("Connection failed: " . mysqli_connect_error());
+}
+?>
