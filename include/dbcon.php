@@ -1,14 +1,14 @@
 <?php
-// include/dbcon.php
-$dbHost = getenv('DB_HOST') ?: '127.0.0.1';
-$dbUser = getenv('DB_USER') ?: 'root';
-$dbPass = getenv('DB_PASS') ?: '';
-$dbName = getenv('DB_NAME') ?: 'project_library';
-$dbPort = getenv('DB_PORT') ?: 3306;
+$dbhost = getenv('DB_HOST') ?: getenv('RDS_HOSTNAME');
+$dbport = getenv('DB_PORT') ?: getenv('RDS_PORT') ?: '3306';
+$dbname = getenv('DB_NAME') ?: getenv('RDS_DB_NAME');
+$dbuser = getenv('DB_USER') ?: getenv('RDS_USERNAME');
+$dbpass = getenv('DB_PASS') ?: getenv('RDS_PASSWORD');
 
-$mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName, (int)$dbPort);
-if ($mysqli->connect_errno) {
+$mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname, (int)$dbport);
+if ($mysqli->connect_error) {
     error_log("DB connect error: " . $mysqli->connect_error);
-    die("Database connection error.");
+    http_response_code(500);
+    exit("Database connection failed");
 }
 $mysqli->set_charset("utf8mb4");
