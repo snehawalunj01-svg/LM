@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v3
+        with:
+          php-version: '8.1'
+          extensions: mbstring, mysqli, xml, zip, gd
+          ini-values: post_max_size=256M, upload_max_filesize=128M
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Composer - version
+        run: composer --version
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: PHP lint
+        run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Composer audit
+        run: composer audit || true
+
+      - name: Package artifact
+        run: |
+          mkdir -p deployment
+          zip -r deployment/application.zip . -x '*.git*' 'deployment/*' 'tests/*' 'node_modules/*' 'vendor/*'
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application
+          path: deployment/application.zip
