@@ -1,11 +1,11 @@
 <?php
 // include/dbcon.php
 // Read DB configuration from environment variables (Elastic Beanstalk / CodeBuild / ECS compatible)
-$dbhost = getenv('DB_HOST') ?: getenv('RDS_HOSTNAME') ?: '127.0.0.1';
+$dbhost = getenv('DB_HOST') ?: getenv('RDS_HOSTNAME') ?: 'library-db.cfik8aewcbl1.ap-south-1.rds.amazonaws.com';
 $dbport = getenv('DB_PORT') ?: getenv('RDS_PORT') ?: '3306';
-$dbname = getenv('DB_NAME') ?: getenv('RDS_DB_NAME') ?: 'project_library';
-$dbuser = getenv('DB_USER') ?: getenv('RDS_USERNAME') ?: 'root';
-$dbpass = getenv('DB_PASS') ?: getenv('RDS_PASSWORD') ?: '';
+$dbname = getenv('DB_NAME') ?: getenv('RDS_DB_NAME') ?: 'library-db';
+$dbuser = getenv('DB_USER') ?: getenv('RDS_USERNAME') ?: 'admin';
+$dbpass = getenv('DB_PASS') ?: getenv('RDS_PASSWORD') ?: 'Admin098';
 $debug = (getenv('APP_DEBUG') === '1' || getenv('DEBUG') === '1');
 if ($debug) {
     ini_set('display_errors', '1');
