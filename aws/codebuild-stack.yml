@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  CloudFormation template to create an S3 artifact bucket and an IAM role
+  for AWS CodeBuild. Use the AWS Console to create a CodeBuild project that
+  uses this role and the bucket (no terminal required).
+
+Parameters:
+  ArtifactBucketName:
+    Type: String
+    Description: Name for the S3 bucket to store build artifacts (must be globally unique)
+  CodeBuildRoleName:
+    Type: String
+    Default: LMCodeBuildServiceRole
+    Description: IAM role name for CodeBuild service
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref ArtifactBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CodeBuildRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: CodeBuildBasicPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${ArtifactBucketName}
+                  - !Sub arn:aws:s3:::${ArtifactBucketName}/*
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: '*'
+
+Outputs:
+  ArtifactBucketName:
+    Description: The S3 bucket created for build artifacts
+    Value: !Ref ArtifactBucketName
+  CodeBuildRoleArn:
+    Description: ARN of the IAM role to assign to CodeBuild
+    Value: !GetAtt CodeBuildServiceRole.Arn
