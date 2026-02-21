@@ -1,20 +1,37 @@
 version: 0.2
-env:
-  variables:
-    ZIP_NAME: "app.zip"
+
 phases:
   install:
     runtime-versions:
-      php: 8.0
+      php: 8.5
     commands:
-      - php -r "copy('https://getcomposer.org/installer','composer-setup.php');"
-      - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-      - composer --version
+      - echo "Starting install phase"
+      - php -v
+      - curl -sS https://getcomposer.org/installer | php
+      - php composer.phar --version
+  pre_build:
+    commands:
+      - echo "Pre-build: clean up old artifacts"
+      - rm -rf deployment || true
+      - mkdir -p deployment
   build:
     commands:
-      - composer install --no-dev --optimize-autoloader
-      - zip -r $ZIP_NAME . -x node_modules/* .git/* .github/* tests/*
+      - echo "Running composer install"
+      - php composer.phar install --no-dev --no-interaction --prefer-dist
+      - echo "Setting basic writable permissions for upload/storage folders if present"
+      - if [ -d upload ]; then chmod -R 775 upload || true; fi
+      - echo "Packaging application into deployment/application.zip"
+      - zip -r deployment/application.zip . -x '*.git*' 'deployment/*' 'tests/*' 'node_modules/*' || true
+  post_build:
+    commands:
+      - echo "Build completed"
+
 artifacts:
+  base-directory: deployment
   files:
-    - app.zip
+    - application.zip
   discard-paths: yes
+
+cache:
+  paths:
+    - '/root/.cache/composer'
