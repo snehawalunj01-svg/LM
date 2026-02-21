@@ -1,0 +1,20 @@
+version: 0.2
+env:
+  variables:
+    ZIP_NAME: "app.zip"
+phases:
+  install:
+    runtime-versions:
+      php: 8.0
+    commands:
+      - php -r "copy('https://getcomposer.org/installer','composer-setup.php');"
+      - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+      - composer --version
+  build:
+    commands:
+      - composer install --no-dev --optimize-autoloader
+      - zip -r $ZIP_NAME . -x node_modules/* .git/* .github/* tests/*
+artifacts:
+  files:
+    - app.zip
+  discard-paths: yes
